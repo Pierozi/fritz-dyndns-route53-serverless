@@ -1,0 +1,93 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: FRITZ!Box DynDns Serverless API
+
+Parameters:
+  DomainName:
+    Description: Hosted zone domain name
+    Type: String
+  DynDnsUsername:
+    Description: Fritz DynDns UserName
+    Type: String
+    Default: ""
+  DynDnsPassword:
+    Description: Fritz DynDns Password
+    Type: String
+    Default: ""
+  ApiEndpointConf:
+    Description: Base domain for the app
+    Type: String
+    Default: REGIONAL
+  ApiStageName:
+    Description: Api Stage
+    Type: String
+    Default: v1
+
+Resources:
+  Api:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: !Ref ApiStageName
+      EndpointConfiguration: !Ref ApiEndpointConf
+      Cors:
+        AllowOrigin: "'*'"
+        AllowHeaders: "'X-Forwarded-For, Authorization'"
+      DefinitionBody:
+        swagger: "2.0"
+        host: "api.fritz.box"
+        basePath:
+          Fn::Sub: ${ApiStageName}
+        info:
+          version:
+            Fn::Sub: ${ApiStageName}
+          title: "FRITZ!Box DynDns Serverless API"
+        schemes:
+          - https
+        consumes:
+          - application/json
+          - application/x-www-form-urlencoded
+          - application/xml
+          - text/xml
+        produces:
+          - application/json
+          - application/xml
+          - text/xml
+          - application/javascript
+          - text/javascript
+        definitions:
+          RecordStatus:
+            properties:
+              success:
+                type: boolean
+        paths:
+          /record:
+            post:
+              x-amazon-apigateway-integration:
+                uri:
+                  Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${UpdateRecordFunction.Arn}/invocations
+                httpMethod: POST
+                type: aws_proxy
+              responses:
+                '200':
+                  schema:
+                    items:
+                      $ref: '#/definitions/RecordStatus'
+
+  UpdateRecordFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: app
+      Handler: main.handler
+      Runtime: nodejs8.10
+      Environment:
+        Variables:
+          username: !Ref DynDnsUsername
+          password: !Ref DynDnsPassword
+          domain: !Ref DomainName
+      Events:
+        RecordUpdate:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /record
+            Method: post
