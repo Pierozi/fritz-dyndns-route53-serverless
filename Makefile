@@ -23,7 +23,7 @@ deploy: package
 		--capabilities CAPABILITY_NAMED_IAM \
 		--stack-name $(stack_name) \
 		--parameter-overrides HostedZoneId=$(hostedZoneId) \
-			RsDomain=$(rsDomain) \
+			RsDomains=$(rsDomains) \
 			DynDnsUsername=$(dynDnsUsername) \
 			DynDnsPassword=$(dynDnsPassword)
 
@@ -32,6 +32,6 @@ local:
 	sam local start-api --region $(region) \
 		-t src/template.yml \
 		--parameter-overrides "ParameterKey=HostedZoneId,ParameterValue=$(hostedZoneId) \
-			ParameterKey=RsDomain,ParameterValue=$(rsDomain) \
+			ParameterKey=RsDomains,ParameterValue=$(rsDomains) \
 			ParameterKey=DynDnsUsername,ParameterValue=$(dynDnsUsername) \
 			ParameterKey=DynDnsPassword,ParameterValue=$(dynDnsPassword)"

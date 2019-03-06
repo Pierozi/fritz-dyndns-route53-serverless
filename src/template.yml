@@ -6,8 +6,8 @@ Parameters:
   HostedZoneId:
     Description: Hosted zone ID of Domain
     Type: String
-  RsDomain:
-    Description: Record Set domain to update
+  RsDomains:
+    Description: List of domains to update split by comma
     Type: String
   DynDnsUsername:
     Description: Fritz DynDns UserName
@@ -92,7 +92,7 @@ Resources:
             Method: post
       Environment:
         Variables:
-          rsDomain: !Ref RsDomain
+          rsDomains: !Ref RsDomains
           username: !Ref DynDnsUsername
           password: !Ref DynDnsPassword
           hostedZoneId: !Ref HostedZoneId

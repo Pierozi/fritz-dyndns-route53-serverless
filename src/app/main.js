@@ -1,7 +1,7 @@
 'use strict';
 const AWS = require('aws-sdk');
 const route53 = new AWS.Route53({apiVersion: '2013-04-01'});
-const { hostedZoneId, rsDomain, username, password } = process.env;
+const { hostedZoneId, rsDomains, username, password } = process.env;
 
 /**
  * Format API Gateway response
@@ -21,18 +21,20 @@ const createResponse = (statusCode, body) => {
 const updateRecord = (ip, callback) => {
   const params = {
     ChangeBatch: {
-      Changes: [{
-        Action: "UPSERT",
-        ResourceRecordSet: {
-          Name: rsDomain,
-          ResourceRecords: [{
-            Value: ip
-          }],
-          TTL: 60,
-          Type: "A"
+      Changes: rsDomains.split(',').map((domain => {
+        return {
+          Action: "UPSERT",
+          ResourceRecordSet: {
+            Name: domain,
+            ResourceRecords: [{
+              Value: ip
+            }],
+            TTL: 60,
+            Type: "A"
+          }
         }
-      }],
-      Comment: "FRITZ!Box record"
+      })),
+      Comment: "FRITZ!Box records"
     },
     HostedZoneId: hostedZoneId
   };
