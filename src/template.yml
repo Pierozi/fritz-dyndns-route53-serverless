@@ -3,8 +3,11 @@ Transform: AWS::Serverless-2016-10-31
 Description: FRITZ!Box DynDns Serverless API
 
 Parameters:
-  DomainName:
-    Description: Hosted zone domain name
+  HostedZoneId:
+    Description: Hosted zone ID of Domain
+    Type: String
+  RsDomain:
+    Description: Record Set domain to update
     Type: String
   DynDnsUsername:
     Description: Fritz DynDns UserName
@@ -62,6 +65,7 @@ Resources:
         paths:
           /record:
             post:
+              operationId: recordUpdate
               x-amazon-apigateway-integration:
                 uri:
                   Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${UpdateRecordFunction.Arn}/invocations
@@ -79,15 +83,23 @@ Resources:
       CodeUri: app
       Handler: main.handler
       Runtime: nodejs8.10
-      Environment:
-        Variables:
-          username: !Ref DynDnsUsername
-          password: !Ref DynDnsPassword
-          domain: !Ref DomainName
       Events:
-        RecordUpdate:
+        recordUpdate:
           Type: Api
           Properties:
             RestApiId: !Ref Api
             Path: /record
             Method: post
+      Environment:
+        Variables:
+          rsDomain: !Ref RsDomain
+          username: !Ref DynDnsUsername
+          password: !Ref DynDnsPassword
+          hostedZoneId: !Ref HostedZoneId
+      Policies:
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - route53:ChangeResourceRecordSets
+              Resource: !Sub "arn:aws:route53:::hostedzone/${HostedZoneId}"

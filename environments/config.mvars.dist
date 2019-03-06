@@ -1,6 +1,7 @@
 bucket=MY-INFRA-BUCKET-NAME
 profile=MY-AWS-CLI-PROFILE
 stack_name=FritzBox-DynDNS
-domainName=my-app-domain.com
+hostedZoneId=Z111AAA1AA1AAA
+rsDomain=my-api-domain.com
 dynDnsUsername=john
 dynDnsPassword=foobarbaz
