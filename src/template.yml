@@ -64,7 +64,7 @@ Resources:
                 type: boolean
         paths:
           /record:
-            post:
+            get:
               operationId: recordUpdate
               x-amazon-apigateway-integration:
                 uri:
@@ -89,7 +89,7 @@ Resources:
           Properties:
             RestApiId: !Ref Api
             Path: /record
-            Method: post
+            Method: get
       Environment:
         Variables:
           rsDomains: !Ref RsDomains
